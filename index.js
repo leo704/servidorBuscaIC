@@ -1,10 +1,21 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-
+const cors=require("cors")
 const app = express();
-const port = 6000;
+const port = 8080;
 
 app.use(bodyParser.json());
+app.use(cors({
+  origin: 'localhost:8080/', // Substitua pelo endereço do seu site
+  methods: 'GET,POST',
+  allowedHeaders: 'Content-Type,Authorization',
+}));
+
+
+app.get("/", (req, res) => {
+  console.log("Response ok.");
+  res.send("Ok – Servidor disponível.");
+});
 
 app.get("/buscar/:palavraChave", (req, res) => {
   const palavraChave = req.params.palavraChave;
