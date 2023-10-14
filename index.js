@@ -83,7 +83,7 @@ app.listen(port, () => {
 //----------------------------------------
 
 const fs = require("fs");
-const pastaDir = "./pdfSaida - Copia";
+const pastaDir = "./public/pdfSaida - Copia";
 // const pastaDir = "./testeJson";
 
 // const termo = "2020";
