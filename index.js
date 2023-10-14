@@ -6,10 +6,20 @@ const port = 8080;
 
 app.use(bodyParser.json());
 app.use(cors({
-  origin: 'localhost:8080/', // Substitua pelo endereço do seu site
-  methods: 'GET,POST',
+  origin: 'http://localhost:8080/', // Substitua pelo endereço do seu site
+  methods: 'GET',
   allowedHeaders: 'Content-Type,Authorization',
 }));
+
+response.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
+
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
+  res.header('Access-Control-Allow-Methods', 'GET');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
 
 
 app.get("/", (req, res) => {
@@ -85,6 +95,8 @@ var respNomeResultado = [];
 
 var conteudoPorPaginaTratado;
 
+var conteudoPorPaginaQuaseTratado;
+
 const qtddPalavras = 30; //metade do que se espera
 
 function funcaoAssincrona1(callback) {
@@ -139,13 +151,15 @@ function daResposta(objJson, nome) {
           if (indiceEncontrado < qtddPalavras) {
             limSup = qtddPalavras * 2;
             for (let i = 0; i < limSup && i < tamDaPagina; i++) {
-              trecho = trecho + " " + conteudoPorPaginaTratado[i];
+              // trecho = trecho + " " + conteudoPorPaginaTratado[i];
+              trecho = trecho + " " + conteudoPorPaginaQuaseTratado[i];
             }
           } else {
             let aux = indiceEncontrado - qtddPalavras;
             limSup = qtddPalavras * 2 + aux;
             for (let i = aux; i < limSup && i < tamDaPagina; i++) {
-              trecho = trecho + " " + conteudoPorPaginaTratado[i];
+              trecho = trecho + " " + conteudoPorPaginaQuaseTratado[i];
+              // trecho = trecho + " " + conteudoPorPaginaTratado[i];
             }
           }
           arrTrecho.push(trecho);
@@ -175,6 +189,7 @@ function pesquisa(vetor) {
 function processarTexto(texto) {
   const textoSemPontuacao = texto.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
   const palavras = textoSemPontuacao.split(/\s+/);
+  conteudoPorPaginaQuaseTratado=texto.split(/\s+/);
   const palavrasEmMinusculas = palavras.map((palavra) => palavra.toLowerCase());
   return palavrasEmMinusculas;
 }
