@@ -22,7 +22,7 @@ app.use((req, res, next) => {
 
 
 app.get("/", (req, res) => {
-  console.log("Response ok.");
+  // console.log("Response ok.");
   res.send("Ok – Servidor disponível.");
 });
 
@@ -30,7 +30,7 @@ app.get("/buscar/:palavraChave", (req, res) => {
   const palavraChave = req.params.palavraChave;
   var resposta;
   respNomeResultado = [];
-  console.log(palavraChave);
+  // console.log(palavraChave);
   termo=palavraChave;
   if (!palavraChave) {
     return res.status(400).json({
@@ -41,17 +41,17 @@ app.get("/buscar/:palavraChave", (req, res) => {
   
   funcaoAssincrona1(() => {
     funcaoAssincrona2(() => {
-      console.log('Antes da funcao extraiNaoVazio')
+      // console.log('Antes da funcao extraiNaoVazio')
       resposta = extraiNaoVazio(respNomeResultado);
-      console.log('Antes da funcao mandaResposta')
+      // console.log('Antes da funcao mandaResposta')
       mandaResposta(resposta);
     });
   });
 
   function mandaResposta(resposta) {
-    console.log("Antes de mandar resposta")
+    // console.log("Antes de mandar resposta")
     res.json(resposta);
-    console.log("Depois de mandar resposta")
+    // console.log("Depois de mandar resposta")
   }
 });
 
@@ -83,12 +83,10 @@ app.listen(port, () => {
 //----------------------------------------
 
 const fs = require("fs");
-const pastaDir = "./public/pdfSaida - Copia";
-// const pastaDir = "./testeJson";
+const pastaDir = "./public";
 
-// const termo = "2020";
 var termo;
-// const termo = "sustentável";
+
 
 var respNomeResultado = [];
 
@@ -116,7 +114,7 @@ function funcaoAssincrona1(callback) {
             let respostaCadaArquivo = daResposta(objetoJSON, arquivo); //passo o doc inteiro e o nome
             respNomeResultado.push(respostaCadaArquivo);
             if (respNomeResultado.length == arquivos.length) {
-              console.log('finaliza call back 1')
+              // console.log('finaliza call back 1')
               callback();
             }
           }
