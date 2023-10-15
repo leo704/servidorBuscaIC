@@ -1,58 +1,79 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const cors=require("cors")
+const cors = require("cors");
 const app = express();
 const port = 8080;
+const { createClient } = require("@supabase/supabase-js");
+const supabase = createClient(
+  "https://zqrjiwthzsuyspjyvnhk.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpxcmppd3RoenN1eXNwanl2bmhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTczMTc2NDQsImV4cCI6MjAxMjg5MzY0NH0.kzw5QhgMeOpf5CngMiKl-aT2ouRscYEXINC4OGbK3GI"
+);
+
+var termo,
+  arquivo,
+  nome,
+  resposta = 0;
+
+async function fetchDataFromSupabase() {
+  try {
+    const { data, error } = await supabase
+      .from("PPCs_Convertidos_Json")
+      .select("nomePPC, PPC");
+    if (error) {
+      console.error("Erro ao recuperar dados do BD:", error);
+    } else {
+      data.forEach((item) => {
+        arquivo = item.PPC;
+        nome = item.nomePPC;
+        funcaoAssincrona(() => {
+          // console.log('apos callback do ' +nome);
+        });
+        console.log('finalizado: ' + nome);
+      });
+      resposta = extraiNaoVazio(respNomeResultado); //extrai nao vazio e retorna reconstruído na quase* formatação inicial. *espaçamentos do tipo paragrafos sao perdidos :(
+
+    }
+  } catch (err) {
+    console.error("Erro geral:", err);
+  }
+}
 
 app.use(bodyParser.json());
-app.use(cors({
-  origin: 'http://localhost:8080/', // Substitua pelo endereço do seu site
-  methods: 'GET',
-  allowedHeaders: 'Content-Type,Authorization',
-}));
-
-
+app.use(
+  cors({
+    origin: "http://localhost:8080/", // Substitua pelo endereço do seu site
+    methods: "GET",
+    allowedHeaders: "Content-Type,Authorization",
+  })
+);
 
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
-  res.header('Access-Control-Allow-Methods', 'GET');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.header("Access-Control-Allow-Methods", "GET");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
   next();
 });
 
-
 app.get("/", (req, res) => {
-  // console.log("Response ok.");
   res.send("Ok – Servidor disponível.");
 });
 
 app.get("/buscar/:palavraChave", (req, res) => {
   const palavraChave = req.params.palavraChave;
-  var resposta;
-  respNomeResultado = [];
-  // console.log(palavraChave);
-  termo=palavraChave;
   if (!palavraChave) {
     return res.status(400).json({
       error:
-        'A solicitação deve incluir uma palavra chave para ser processada.',
+        "A solicitação deve incluir uma palavra chave para ser processada.",
     });
   }
-  
-  funcaoAssincrona1(() => {
-    funcaoAssincrona2(() => {
-      // console.log('Antes da funcao extraiNaoVazio')
-      resposta = extraiNaoVazio(respNomeResultado);
-      // console.log('Antes da funcao mandaResposta')
-      mandaResposta(resposta);
-    });
-  });
-
-  function mandaResposta(resposta) {
-    // console.log("Antes de mandar resposta")
+  termo = palavraChave;
+  async function poeOrdem() {
+    await fetchDataFromSupabase(); //essa e depois a linha de baixo
+    console.log("Mandando a respota");
     res.json(resposta);
-    // console.log("Depois de mandar resposta")
+    console.log(resposta);
   }
+  poeOrdem();
 });
 
 function extraiNaoVazio(objetoResultado) {
@@ -85,9 +106,6 @@ app.listen(port, () => {
 const fs = require("fs");
 const pastaDir = "./public";
 
-var termo;
-
-
 var respNomeResultado = [];
 
 var conteudoPorPaginaTratado;
@@ -96,36 +114,11 @@ var conteudoPorPaginaQuaseTratado;
 
 const qtddPalavras = 30; //metade do que se espera
 
-function funcaoAssincrona1(callback) {
-  fs.readdir(pastaDir, (err, arquivos) => {
-    if (err) {
-      console.error("Erro ao listar os arquivos: ", err);
-      return;
-    }
-    arquivos.forEach((arquivo) => {
-      if (arquivo.endsWith(".json")) {
-        const arquivoDir = `${pastaDir}/${arquivo}`;
-        fs.readFile(arquivoDir, "utf-8", (err, dados) => {
-          if (err) {
-            console.error(`Erro ao ler o arquivo ${arquivoDir}: `, err);
-            return;
-          } else {
-            let objetoJSON = JSON.parse(dados); //converte a string recebida para json
-            let respostaCadaArquivo = daResposta(objetoJSON, arquivo); //passo o doc inteiro e o nome
-            respNomeResultado.push(respostaCadaArquivo);
-            if (respNomeResultado.length == arquivos.length) {
-              // console.log('finaliza call back 1')
-              callback();
-            }
-          }
-        });
-      }
-    });
-  });
-}
-
-function funcaoAssincrona2(callback) {
-  // console.log(`Se isso aqui for igual a 202, aiai: ${respNomeResultado.length}`);
+function funcaoAssincrona(callback) {
+  var respostaCadaArquivo = daResposta(arquivo, nome); //passo o doc inteiro e o nome
+  // console.log(respostaCadaArquivo);
+  respNomeResultado.push(respostaCadaArquivo);
+  // console.log("ante do callback do item: " + nome);
   callback();
 }
 
@@ -186,7 +179,7 @@ function pesquisa(vetor) {
 function processarTexto(texto) {
   const textoSemPontuacao = texto.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
   const palavras = textoSemPontuacao.split(/\s+/);
-  conteudoPorPaginaQuaseTratado=texto.split(/\s+/);
+  conteudoPorPaginaQuaseTratado = texto.split(/\s+/);
   const palavrasEmMinusculas = palavras.map((palavra) => palavra.toLowerCase());
   return palavrasEmMinusculas;
 }
