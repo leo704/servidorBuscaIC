@@ -1,3 +1,5 @@
+// integrado ao BD
+
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -13,30 +15,6 @@ var termo,
   arquivo,
   nome,
   resposta = 0;
-
-async function fetchDataFromSupabase() {
-  try {
-    const { data, error } = await supabase
-      .from("PPCs_Convertidos_Json")
-      .select("nomePPC, PPC");
-    if (error) {
-      console.error("Erro ao recuperar dados do BD:", error);
-    } else {
-      data.forEach((item) => {
-        arquivo = item.PPC;
-        nome = item.nomePPC;
-        funcaoAssincrona(() => {
-          // console.log('apos callback do ' +nome);
-        });
-        console.log('finalizado: ' + nome);
-      });
-      resposta = extraiNaoVazio(respNomeResultado); //extrai nao vazio e retorna reconstruído na quase* formatação inicial. *espaçamentos do tipo paragrafos sao perdidos :(
-
-    }
-  } catch (err) {
-    console.error("Erro geral:", err);
-  }
-}
 
 app.use(bodyParser.json());
 app.use(
@@ -68,33 +46,35 @@ app.get("/buscar/:palavraChave", (req, res) => {
   }
   termo = palavraChave;
   async function poeOrdem() {
-    await fetchDataFromSupabase(); //essa e depois a linha de baixo
+    resposta = await fetchDataFromSupabase(); //essa e depois a linha de baixo
     console.log("Mandando a respota");
     res.json(resposta);
-    console.log(resposta);
+    // console.log(resposta);
   }
   poeOrdem();
 });
 
-function extraiNaoVazio(objetoResultado) {
-  let temp = [];
-  for (const resultado in objetoResultado) {
-    let vetRespostas = [];
-    let achou = false;
-    let objeto = objetoResultado[resultado];
-    for (const indice in objeto.achou) {
-      let texto = objeto.achou[indice].trecho;
-      let qtddTermoPag = Object.keys(texto).length;
-      if (qtddTermoPag != 0) {
-        vetRespostas.push(objeto.achou[indice]);
-        achou = true;
-      }
+async function fetchDataFromSupabase() {
+  try {
+    const { data, error } = await supabase
+      .from("PPCs_Convertidos_Json")
+      .select("nomePPC, PPC");
+    if (error) {
+      console.error("Erro ao recuperar dados do BD:", error);
+    } else {
+      data.forEach((item) => {
+        arquivo = JSON.parse(item.PPC);
+        nome = item.nomePPC;
+        funcaoAssincrona(() => {
+          // console.log("Após função assíncrona");
+        });
+        console.log("finalizado: " + nome);
+      });
+      return respNomeResultado; //extrai nao vazio e retorna reconstruído na quase* formatação inicial. *espaçamentos do tipo paragrafos sao perdidos :(
     }
-    if (achou) {
-      temp.push({ nome: objeto.nome, achou: vetRespostas });
-    }
+  } catch (err) {
+    console.error("Erro geral:", err);
   }
-  return temp;
 }
 
 // Inicia o servidor na porta especificada
@@ -115,11 +95,24 @@ var conteudoPorPaginaQuaseTratado;
 const qtddPalavras = 30; //metade do que se espera
 
 function funcaoAssincrona(callback) {
-  var respostaCadaArquivo = daResposta(arquivo, nome); //passo o doc inteiro e o nome
-  // console.log(respostaCadaArquivo);
-  respNomeResultado.push(respostaCadaArquivo);
-  // console.log("ante do callback do item: " + nome);
+  let respostaCadaArquivo = daResposta(arquivo, nome); //passo o doc inteiro e o nome
+  let objNaoNulo = extraiNaoVazio(respostaCadaArquivo);
+  if (objNaoNulo.length != 0) {
+    respNomeResultado.push(objNaoNulo);
+  }
   callback();
+}
+
+function extraiNaoVazio(objeto) {
+  let vetRespostas = [];
+  for (const indice in objeto.achou) {
+    let texto = objeto.achou[indice].trecho;
+    let qtddTermoPag = Object.keys(texto).length;
+    if (qtddTermoPag != 0) {
+      vetRespostas.push(objeto.achou[indice]);
+    }
+  }
+  return vetRespostas;
 }
 
 //recebo o doc inteiro e o nome
