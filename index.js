@@ -68,7 +68,7 @@ async function fetchDataFromSupabase() {
         funcaoAssincrona(() => {
           // console.log("Após função assíncrona");
         });
-        console.log("finalizado: " + nome);
+        // console.log("finalizado: " + nome);
       });
       return respNomeResultado; //extrai nao vazio e retorna reconstruído na quase* formatação inicial. *espaçamentos do tipo paragrafos sao perdidos :(
     }
@@ -97,22 +97,28 @@ const qtddPalavras = 30; //metade do que se espera
 function funcaoAssincrona(callback) {
   let respostaCadaArquivo = daResposta(arquivo, nome); //passo o doc inteiro e o nome
   let objNaoNulo = extraiNaoVazio(respostaCadaArquivo);
-  if (objNaoNulo.length != 0) {
+  if (Object.keys(objNaoNulo).length) {
     respNomeResultado.push(objNaoNulo);
   }
   callback();
 }
 
 function extraiNaoVazio(objeto) {
+  let temp = {};
+  let boo=false;
   let vetRespostas = [];
   for (const indice in objeto.achou) {
     let texto = objeto.achou[indice].trecho;
     let qtddTermoPag = Object.keys(texto).length;
     if (qtddTermoPag != 0) {
       vetRespostas.push(objeto.achou[indice]);
+      boo=true;
     }
   }
-  return vetRespostas;
+  if(boo){
+    temp = { nome: objeto.nome, achou: vetRespostas };
+  }
+  return temp;
 }
 
 //recebo o doc inteiro e o nome
