@@ -1,0 +1,7 @@
+[build]
+  functions = "./minhaApi"
+
+[[redirects]]
+  from = "/"
+  to = "/.netlify/functions/index/:splat"
+  status = 200
