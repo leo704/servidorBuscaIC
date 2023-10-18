@@ -11,10 +11,10 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpxcmppd3RoenN1eXNwanl2bmhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTczMTc2NDQsImV4cCI6MjAxMjg5MzY0NH0.kzw5QhgMeOpf5CngMiKl-aT2ouRscYEXINC4OGbK3GI"
 );
 
-var termo,
-  arquivo,
-  nome,
-  resposta = 0;
+var termo=null,
+  arquivo=null,
+  nome=null,
+  resposta=null;
 
 app.use(bodyParser.json());
 app.use(
@@ -47,9 +47,15 @@ app.get("/buscar/:palavraChave", (req, res) => {
   termo = palavraChave;
   async function poeOrdem() {
     resposta = await fetchDataFromSupabase(); //essa e depois a linha de baixo
-    console.log("Mandando a respota");
+    // console.log("Mandando a respota");
     res.json(resposta);
-    // console.log(resposta);
+    termo=null,
+    arquivo=null,
+    nome=null,
+    resposta=null;
+    respNomeResultado = [];
+    conteudoPorPaginaTratado = null;
+    conteudoPorPaginaQuaseTratado = null;
   }
   poeOrdem();
 });
@@ -88,9 +94,9 @@ const pastaDir = "./public";
 
 var respNomeResultado = [];
 
-var conteudoPorPaginaTratado;
+var conteudoPorPaginaTratado = null;
 
-var conteudoPorPaginaQuaseTratado;
+var conteudoPorPaginaQuaseTratado = null;
 
 const qtddPalavras = 30; //metade do que se espera
 
