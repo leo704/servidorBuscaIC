@@ -11,10 +11,10 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpxcmppd3RoenN1eXNwanl2bmhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTczMTc2NDQsImV4cCI6MjAxMjg5MzY0NH0.kzw5QhgMeOpf5CngMiKl-aT2ouRscYEXINC4OGbK3GI"
 );
 
-var termo=null,
-  arquivo=null,
-  nome=null,
-  resposta=null;
+var termo = null,
+  arquivo = null,
+  nome = null,
+  resposta = null;
 
 app.use(bodyParser.json());
 app.use(
@@ -49,10 +49,7 @@ app.get("/buscar/:palavraChave", (req, res) => {
     resposta = await fetchDataFromSupabase(); //essa e depois a linha de baixo
     // console.log("Mandando a respota");
     res.json(resposta);
-    termo=null,
-    arquivo=null,
-    nome=null,
-    resposta=null;
+    (termo = null), (arquivo = null), (nome = null), (resposta = null);
     respNomeResultado = [];
     conteudoPorPaginaTratado = null;
     conteudoPorPaginaQuaseTratado = null;
@@ -111,17 +108,17 @@ function funcaoAssincrona(callback) {
 
 function extraiNaoVazio(objeto) {
   let temp = {};
-  let boo=false;
+  let boo = false;
   let vetRespostas = [];
   for (const indice in objeto.achou) {
     let texto = objeto.achou[indice].trecho;
     let qtddTermoPag = Object.keys(texto).length;
     if (qtddTermoPag != 0) {
       vetRespostas.push(objeto.achou[indice]);
-      boo=true;
+      boo = true;
     }
   }
-  if(boo){
+  if (boo) {
     temp = { nome: objeto.nome, achou: vetRespostas };
   }
   return temp;
@@ -182,7 +179,7 @@ function pesquisa(vetor) {
 }
 
 function processarTexto(texto) {
-  const textoSemPontuacao = texto.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
+  const textoSemPontuacao = texto.replace(/[.,\/#!$%\^&\*;:'{}=\-_`~()]/g, "");
   const palavras = textoSemPontuacao.split(/\s+/);
   conteudoPorPaginaQuaseTratado = texto.split(/\s+/);
   const palavrasEmMinusculas = palavras.map((palavra) => palavra.toLowerCase());
